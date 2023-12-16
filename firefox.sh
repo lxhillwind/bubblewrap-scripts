@@ -133,7 +133,7 @@ flags=(
     "${flags_gui[@]}"
 
     # font CJK fix
-    --ro-bind ~/lx/linux/font-cjk-fix.conf ~/.config/fontconfig/fonts.conf
+    --ro-bind "$(dirname "$(realpath "$0")")"/font-cjk-fix.conf ~/.config/fontconfig/fonts.conf
     # app
     --bind ~/.mozilla-box ~/.mozilla
     --ro-bind ~/.config/firefoxCSS ~/.config/firefoxCSS

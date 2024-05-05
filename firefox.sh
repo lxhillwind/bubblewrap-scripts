@@ -63,6 +63,8 @@ flags_fedora=(
     --ro-bind /etc/alternatives/ /etc/alternatives/
     --ro-bind /etc/resolv.conf /etc/resolv.conf
     --ro-bind /etc/fonts/ /etc/fonts/
+    # timezone
+    --ro-bind /etc/localtime /etc/localtime
 
     # ssl (non-firefox)
     --ro-bind /etc/pki/tls/cert.pem /etc/pki/tls/cert.pem

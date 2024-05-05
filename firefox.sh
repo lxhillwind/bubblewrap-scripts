@@ -17,8 +17,12 @@ fi
 dbus_file_new=/tmp/dbus-proxy/"${0##*/}$is_wayland"
 touch "$dbus_file_new"
 dbus_rules=(
+    # dbus rules is copied from:
+    # https://github.com/netblue30/firejail/blob/550f15d0e062b0a6ac0efb642637ffb395edc5d6/etc/profile-a-l/firefox.profile#L39
     --talk='org.fcitx.Fcitx5'  # fcitx5
-    --own='org.mozilla.firefox.*'  # open url
+    --talk='org.freedesktop.Notifications'  # native notifications
+    --own='org.mpris.MediaPlayer2.firefox.*'  # show in DE's multimedia control
+    --own='org.mozilla.*'  # open url
     )
 # run flock to avoid duplicating xdg-dbus-proxy process;
 # run in background, so error check is not required;

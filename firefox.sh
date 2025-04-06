@@ -37,6 +37,7 @@ firefox="/usr/bin/firefox"
 mkdir -p ~/.mozilla-box
 mkdir -p ~/.local/share/tridactyl-box
 mkdir -p ~/.config/transmission-box
+mkdir -p /tmp/rss-from-tridactyl
 
 flags_archlinux=(
     --ro-bind ~/.sandbox/archlinux/usr /usr
@@ -142,7 +143,6 @@ flags=(
     --ro-bind "$(dirname "$(realpath "$0")")"/font-cjk-fix.conf ~/.config/fontconfig/fonts.conf
     # app
     --bind ~/.mozilla-box ~/.mozilla
-    --ro-bind ~/.config/firefoxCSS ~/.config/firefoxCSS
     # NOTE: tridactylrc is a regular file; when modified, it will be out ot sync!
     # we can workaround this by set autocmd (BufWriteCmd) for ~/.tridactylrc:
     #
@@ -158,10 +158,11 @@ flags=(
 
     --ro-bind ~/.config/tridactyl/ ~/.config/tridactyl/
     --bind ~/Downloads/ ~/Downloads/
+    --bind /tmp/rss-from-tridactyl /tmp/rss-from-tridactyl
     --ro-bind ~/html/ ~/html/
     --ro-bind ~/.vimrc ~/.vimrc --ro-bind ~/vimfiles/ ~/vimfiles/
-    # opensuse system doc.
-    --ro-bind-try /usr/share/doc/packages/ ~/opensuse-doc-packages/
+
+    --bind ~/notes-local/read-it-later/ ~/notes-local/read-it-later/
 
     # mpv conf
     --ro-bind ~/.config/mpv/ ~/.config/mpv/

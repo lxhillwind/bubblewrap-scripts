@@ -49,6 +49,10 @@ flags=(
     # required for kvm.
     --dev-bind /dev/kvm /dev/kvm
 
+    # temporarily uncomment these, to enable usb passthrough.
+    # --bind /sys /sys
+    # --dev-bind /dev /dev
+
     # timezone.
     --ro-bind /etc/localtime /etc/localtime
     # font and network (also --share-net)

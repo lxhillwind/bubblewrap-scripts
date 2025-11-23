@@ -52,7 +52,6 @@ flags_system=(
     # shell, tool, etc.
     --setenv SHELL /bin/zsh
     --ro-bind /bin/ /bin/
-    --tmpfs /usr/sbin/
     # --bind here to make it upgrade.
     --bind ~/.sandbox/vscode/VSCode-linux-x64 /opt/vscode
     # ssh
@@ -130,9 +129,9 @@ flags=(
     # app
     --bind ~/.code-box/vscode ~/.vscode
     --bind ~/.code-box/config ~/.config/Code
-    --ro-bind ~/.config/nvim ~/.config/nvim
     --ro-bind ~/vimfiles ~/vimfiles
     --ro-bind ~/.vimrc ~/.vimrc
+    --ro-bind ~/.config/zshrc ~/.config/zshrc
     --bind ~/.code-box/cache-fontconfig ~/.cache/fontconfig
     --bind ~/.code-box/pki ~/.pki
     --bind ~/repos/UNTRUSTED ~/repos/UNTRUSTED

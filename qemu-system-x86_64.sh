@@ -92,6 +92,15 @@ flags=(
     --die-with-parent --new-session
 )
 
+# make smb work for windows xp;
+# https://askubuntu.com/questions/1352628/qemu-built-in-smb-server-problem-with-winxp-guest
+if printf %s "$*" | grep -Eq '(^| )-name xp( |$)'; then
+    (
+        sleep 5;
+        sed -i '/\[global\]/a min protocol = NT1' /tmp/vm_spice/qemu-smb.*/smb.conf;
+    ) &
+fi
+
 # -L option is workaround for `qemu: could not load PC BIOS 'bios-256k.bin'`.
 # (in sandbox)
 # see https://unix.stackexchange.com/questions/134893/cannot-start-kvm-vm-because-missing-bios

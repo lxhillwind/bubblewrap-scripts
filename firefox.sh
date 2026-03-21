@@ -173,7 +173,11 @@ flags=(
     # security
     --new-session
     # disable --die-with-parent to allow `:restart` in it.
-    #--die-with-parent
+    --die-with-parent
+
+    # fix glycin issue: https://gitlab.gnome.org/GNOME/glycin/-/issues/217
+    # ref: https://gitlab.gnome.org/GNOME/glycin/-/commit/28005a815e8e6f8869006e5481fd8d77006ec8d1
+    --unshare-user --disable-userns
 )
 
 exec bwrap "${flags[@]}" -- "$firefox" "$@"

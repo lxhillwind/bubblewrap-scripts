@@ -1,0 +1,109 @@
+#!/bin/bash
+set -e
+
+if [ "$ALPINE" = 1 ]; then
+    echo 'using alpine; do not pass ALPINE=1 to use fedora.'
+    declare -n flags_system=flags_alpine
+else
+    echo 'using fedora; pass ALPINE=1 to use alpine.'
+    declare -n flags_system=flags_fedora
+fi
+echo
+
+flags_alpine=(
+    --ro-bind ~/.sandbox/alpine/usr /usr
+    --ro-bind ~/.sandbox/alpine/bin /bin
+    --ro-bind ~/.sandbox/alpine/lib /lib
+    # /usr/share/fonts dir may not exist yet:
+    #   bwrap: Can't mkdir XXX: Read-only file system
+    # create <path-to-sandbox>/usr/share/fonts manually if necessary.
+    --ro-bind /usr/share/fonts /usr/share/fonts
+    --ro-bind /etc/fonts /etc/fonts
+)
+flags_fedora=(
+    --ro-bind /usr /usr
+    --symlink usr/bin /bin
+    --symlink usr/lib64 /lib64
+    --symlink usr/lib /lib
+    --ro-bind /etc/fonts /etc/fonts
+
+    # fix missing lib
+    --ro-bind /etc/ld.so.conf /etc/ld.so.conf
+    --ro-bind /etc/ld.so.conf.d /etc/ld.so.conf.d
+    --ro-bind /etc/ld.so.cache /etc/ld.so.cache
+    --ro-bind /etc/alternatives /etc/alternatives
+)
+
+if [ -n "$WAYLAND_DISPLAY" ]; then
+    # wayland
+    flags_gui=(
+        --setenv WAYLAND_DISPLAY "$WAYLAND_DISPLAY"
+        --ro-bind /run/user/"$UID"/"$WAYLAND_DISPLAY" /run/user/"$UID"/"$WAYLAND_DISPLAY"
+    )
+else
+    # x11
+    flags_gui=(
+        --setenv DISPLAY "$DISPLAY"
+        --ro-bind ~/.Xauthority ~/.Xauthority
+    )
+fi
+
+flags=(
+    # env:
+    --clearenv
+    # basic
+    --setenv PATH /bin:/usr/bin --setenv USER "$USER" --setenv HOME ~
+    # app
+    --setenv XDG_RUNTIME_DIR "$XDG_RUNTIME_DIR"
+
+    # lib and bin
+    "${flags_system[@]}"
+
+    --tmpfs /tmp
+
+    # proc, sys, dev
+    --proc /proc
+    # --ro-bind /sys /sys; see https://wiki.archlinux.org/title/Bubblewrap
+    --ro-bind /sys/dev/char /sys/dev/char
+    --ro-bind /sys/devices/pci0000:00 /sys/devices/pci0000:00
+    --dev /dev
+
+    # icon
+    --setenv XCURSOR_SIZE "$XCURSOR_SIZE"
+    --setenv XCURSOR_THEME "$XCURSOR_THEME"
+
+    "${flags_gui[@]}"
+
+    # NOTE: (security)
+    # --bind a/ then --ro-bind a/b (file), a/b is ro in sandbox;
+    # but if we modify a/b (change fd), then a/b will be rw!
+    # so, do not use --ro-bind inside --bind.
+
+    # network.
+    --unshare-all --share-net
+
+    # security
+    --new-session
+    --die-with-parent
+)
+
+double_dash=
+flags_app=()
+for i in "$@"; do
+    if [ -z "$double_dash" ] && [ "$i" = -- ]; then
+        double_dash=1
+    else
+        if [ -z "$double_dash" ]; then
+            flags=("${flags[@]}" "$i")
+        else
+            flags_app=("${flags_app[@]}" "$i")
+        fi
+    fi
+done
+
+if [ ${#flags_app} = 0 ]; then
+    printf '%s\n' "Usage: $0 [bwrap args]... -- {program} [args...]" >&2
+    exit 1
+fi
+
+exec bwrap "${flags[@]}" -- "${flags_app[@]}"

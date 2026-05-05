@@ -35,23 +35,19 @@ DBUS_SESSION_BUS_ADDRESS="unix:path=$dbus_file_new"
 
 # main {{{1
 code="/opt/vscode/code"
-mkdir -p ~/.code-box/home
-mkdir -p ~/.code-box/vscode
-mkdir -p ~/.code-box/config
-mkdir -p ~/.code-box/cache-fontconfig
-mkdir -p ~/.code-box/pki
-mkdir -p ~/repos/UNTRUSTED
-[ -e ~/.code-box/zshrc ] || printf 'source ~/.config/zshrc\n' >> ~/.code-box/zshrc
 code_flags=()
 
 flags_system=(
+    --symlink usr/lib64 /lib64
+    --symlink usr/lib /lib
+    --symlink usr/bin /bin
+    --symlink usr/sbin /sbin
+
     # vscode lib dep
-    --ro-bind /lib64/ /lib64/
     --ro-bind /etc/alternatives/ /etc/alternatives/
     --ro-bind /usr/ /usr/
     # shell, tool, etc.
     --setenv SHELL /bin/zsh
-    --ro-bind /bin/ /bin/
     # --bind here to make it upgrade.
     --bind ~/.sandbox/vscode/VSCode-linux-x64 /opt/vscode
     # ssh
@@ -59,9 +55,7 @@ flags_system=(
     # font
     --ro-bind /etc/fonts /etc/fonts
     # ssl
-    --ro-bind /etc/pki/tls/cert.pem /etc/pki/tls/cert.pem
-    # curl depends on this.
-    --ro-bind /etc/pki/tls/certs/ca-bundle.crt /etc/pki/tls/certs/ca-bundle.crt
+    --ro-bind /etc/pki/ /etc/pki/
     # timezone
     --ro-bind /etc/localtime /etc/localtime
     # network (also --share-net)
@@ -123,48 +117,36 @@ flags=(
     # but if we modify a/b (change fd), then a/b will be rw!
     # so, do not use --ro-bind inside --bind.
 
-    --bind ~/.code-box/home ~
+    # this should be put before flags_gui.
+    --bind ~/.sandbox/code-home ~
+
     "${flags_gui[@]}"
 
     # app
-    --bind ~/.code-box/vscode ~/.vscode
-    --bind ~/.code-box/config ~/.config/Code
     --ro-bind ~/vimfiles ~/vimfiles
     --ro-bind ~/.vimrc ~/.vimrc
     --ro-bind ~/.config/zshrc ~/.config/zshrc
-    --bind ~/.code-box/cache-fontconfig ~/.cache/fontconfig
-    --bind ~/.code-box/pki ~/.pki
-    --bind ~/repos/UNTRUSTED ~/repos/UNTRUSTED
 
     # network.
     --unshare-all --share-net
 
     # security
     --new-session
-    # code is run like daemon mode.
-    #--die-with-parent
+    --die-with-parent
 )
 
-bind_option=
-
+double_dash=
+flags_app=()
 for i in "$@"; do
-    if [ -d "$i" ]; then
-        if [ -t 0 ] && [ -z "$bind_option" ]; then
-            printf 'bind directory read-write? (default is read-only)\n[y/N] ' >&2
-            case "$(read -s -n 1 x; printf %s "$x")" in
-                y|Y)
-                    bind_option=--bind
-                    ;;
-            esac
-            echo
+    if [ -z "$double_dash" ] && [ "$i" = -- ]; then
+        double_dash=1
+    else
+        if [ -z "$double_dash" ]; then
+            flags=("${flags[@]}" "$i")
+        else
+            flags_app=("${flags_app[@]}" "$i")
         fi
-        if [ -z "$bind_option" ]; then
-            bind_option=--ro-bind
-        fi
-
-        real_path="$(realpath "$i")"
-        flags=("${flags[@]}" "$bind_option" "$real_path"  "$real_path")
     fi
 done
 
-exec bwrap "${flags[@]}" -- "$code" "${code_flags[@]}" "$@"
+exec bwrap "${flags[@]}" -- "$code" "${code_flags[@]}" -n "${flags_app[@]}"

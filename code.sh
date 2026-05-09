@@ -127,6 +127,9 @@ flags=(
     --ro-bind ~/.vimrc ~/.vimrc
     --ro-bind ~/.config/zshrc ~/.config/zshrc
 
+    # make pyside6 app start.
+    --ro-bind /etc/machine-id /etc/machine-id
+
     # network.
     --unshare-all --share-net
 

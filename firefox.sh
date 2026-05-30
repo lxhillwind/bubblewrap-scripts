@@ -72,7 +72,7 @@ flags_fedora=(
     --ro-bind /etc/localtime /etc/localtime
 
     # ssl (non-firefox)
-    --ro-bind /etc/pki/tls/cert.pem /etc/pki/tls/cert.pem
+    --ro-bind /etc/pki/ /etc/pki/
     # fix missing lib for mpv
     --ro-bind /etc/ld.so.conf /etc/ld.so.conf
     --ro-bind /etc/ld.so.conf.d /etc/ld.so.conf.d

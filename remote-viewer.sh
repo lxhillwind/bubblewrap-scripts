@@ -68,7 +68,7 @@ flags=(
     # network (also --share-net)
     --ro-bind /etc/resolv.conf /etc/resolv.conf
     # ssl
-    --ro-bind /etc/pki/tls/cert.pem /etc/pki/tls/cert.pem
+    --ro-bind /etc/pki/ /etc/pki/
 
     # icon
     --setenv XCURSOR_SIZE "$XCURSOR_SIZE"

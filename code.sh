@@ -46,6 +46,9 @@ flags_system=(
     # vscode lib dep
     --ro-bind /etc/alternatives/ /etc/alternatives/
     --ro-bind /usr/ /usr/
+    --ro-bind /etc/ld.so.conf /etc/ld.so.conf
+    --ro-bind /etc/ld.so.conf.d /etc/ld.so.conf.d
+    --ro-bind /etc/ld.so.cache /etc/ld.so.cache
     # shell, tool, etc.
     --setenv SHELL /bin/zsh
     # --bind here to make it upgrade.
